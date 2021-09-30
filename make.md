@@ -75,7 +75,7 @@ make: *** [Makefile:55: boot/head.o] Error 1
 
 `find ./ -name Makefile`
 
-![image-20210913231709658](.md\image-20210913231709658.png)
+![image-20210913231709658](.md/image-20210913231709658.png)
 
 #### 修改所有Makefile文件
 
@@ -83,7 +83,7 @@ make: *** [Makefile:55: boot/head.o] Error 1
 * 将**`CC`**的**`-mcpu`**修改为**`-march`**;
 * 在**`CFLAGS`**后添加**`-m32`**;
 
-![image-20210913224531952](.md\image-20210913224123741.png)
+![image-20210913224531952](.md/image-20210913224123741.png)
 
 **修改为**：
 
@@ -145,7 +145,7 @@ make: *** [Makefile:36: init/main.o] Error 1
 
 **修改`init/main.c`文件**：删除**static**
 
-![image-20210913225243596](.md\image-20210913225243596.png)
+![image-20210913225243596](.md/image-20210913225243596.png)
 
 **修改后**：
 
@@ -199,7 +199,7 @@ make: *** [Makefile:78: kernel/kernel.o] Error 2
 
 将**`./kernel/Makefile`**第**32**行
 
-![image-20210913232908096](.md\image-20210913232908096.png)
+![image-20210913232908096](.md/image-20210913232908096.png)
 
 修改为：
 
@@ -234,7 +234,7 @@ In file included from traps.c:13:0:
 
 将**`./kernel/Makefile`**的**`CFLAGS`**添加**`-fno-builtin`**：
 
-![image-20210913234435301](.md\image-20210913234435301.png)
+![image-20210913234435301](.md/image-20210913234435301.png)
 
 修改为：
 
@@ -279,7 +279,7 @@ make: *** [Makefile:32: kernel.o] Error 1
 
 把`./include/string.h`中的**extern**关键字全部改成**static**：
 
-![image-20210920165651875](D:\cpp\linux-0.11\.md\image-20210920165651875.png)
+![image-20210920165651875](.md/image-20210920165651875.png)
 
 
 
@@ -293,11 +293,11 @@ make[1]: *** [Makefile:23: mm.o] Error 1
 
 在`./mm/Makefile`第**23**行**ld**命令添加**-m elf_i386**选项；
 
-![image-20210920170258652](D:\cpp\linux-0.11\.md\image-20210920170258652.png)
+![image-20210920170258652](.md/image-20210920170258652.png)
 
 在`./fs/Makefile`第**23**行**ld**命令添加**-m elf_i386**选项；
 
-![image-20210920171823512](.md\image-20210920171823512.png)
+![image-20210920171823512](.md/image-20210920171823512.png)
 
 
 
@@ -317,7 +317,7 @@ make[1]: *** [Makefile:13: exec.o] Error 1
 
 在`.fs/exec.c`文件的第**139行**添加**括号**
 
-![image-20210920171433534](.md\image-20210920171433534.png)
+![image-20210920171433534](.md/image-20210920171433534.png)
 
 
 
@@ -350,7 +350,7 @@ tty_io.c:316:8: note: in expansion of macro ‘toupper’
 
 将`./include/ctype.h`第**16-26**行从：
 
-![image-20210920180100421](.md\image-20210920180100421.png)
+![image-20210920180100421](.md/image-20210920180100421.png)
 
 修改为：
 
@@ -386,7 +386,7 @@ make: *** [Makefile:87: lib/lib.a] Error 2
 
 将`./lib/malloc.c`文件第**156**行由：
 
-![image-20210920185441067](D:\cpp\hello-linux\.md\image-20210920185441067.png)
+![image-20210920185441067](.md/image-20210920185441067.png)
 
 修改为：
 
