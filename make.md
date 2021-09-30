@@ -402,3 +402,104 @@ make: *** [Makefile:87: lib/lib.a] Error 2
 158             panic("Out of memory in kernel malloc()");
 ~~~
 
+
+
+## system_call.s:94: Warning: indirect call without `*'
+
+~~~shell
+make[1]: Entering directory '/home/baowj/linux/kernel'
+gcc -march=i386 -Wall -fno-builtin -m32 -O -fstrength-reduce -fomit-frame-pointer -finline-functions -nostdinc -I../include \
+-c -o sched.o sched.c
+as --32 -o system_call.o system_call.s
+system_call.s: Assembler messages:
+system_call.s:94: Warning: indirect call without `*'
+~~~
+
+### 解决方法
+
+将`./kernel/system_class.s`第**94**行，从
+
+~~~c
+call sys_call_table(,%eax,4)
+~~~
+
+修改为
+
+~~~c
+call *sys_call_table(,%eax,4)
+~~~
+
+
+
+## exec.c:139:45: warning: assignment makes integer from pointer without a cast [-Wint-conversion]
+~~~shell
+exec.c: In function ‘copy_strings’:
+exec.c:139:45: warning: assignment makes integer from pointer without a cast [-Wint-conversion]
+         !(pag = (char *) (page[p/PAGE_SIZE] =
+                                             ^
+~~~
+
+### 解决方法
+
+将`./fs/exec.c`文件的第**139**行，从：
+
+~~~c
+!(pag = (char *) (page[p/PAGE_SIZE] = (unsigned long *) get_free_page())))
+~~~
+
+修改为：
+
+~~~c
+!(pag = (char *) (page[p/PAGE_SIZE] = get_free_page())))
+~~~
+
+
+
+## ld: -f may not be used without -shared
+
+~~~shell
+ld -m elf_i386 -Ttext 0 -e startup_32 -fno-stack-protector -f boot/head.o init/main.o \
+kernel/kernel.o mm/mm.o fs/fs.o \
+kernel/blk_drv/blk_drv.a kernel/chr_drv/chr_drv.a \
+kernel/math/math.a \
+lib/lib.a \
+-o tools/system
+ld: -f may not be used without -shared
+make: *** [Makefile:60: tools/system] Error 1
+~~~
+
+### 解决方法
+
+将`./Makefile`第**60**行，从：
+
+![image-20210930193709612](.md/image-20210930193709612.png)
+
+修改为：
+
+~~~makefile
+ 58 tools/system:   boot/head.o init/main.o \
+ 59         $(ARCHIVES) $(DRIVERS) $(MATH) $(LIBS)
+ 60     $(LD) $(LDFLAGS) -shared boot/head.o init/main.o \
+ 61     $(ARCHIVES) \
+ 62     $(DRIVERS) \
+ 63     $(MATH) \
+ 64     $(LIBS) \
+ 65     -o tools/system
+ 66     nm tools/system | grep -v '\(compiled\)\|\(\.o$$\)\|\( [aU] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)'| sort > System.map
+~~~
+
+
+
+## warning: variable ‘qualifier’ set but not used [-Wunused-but-set-variable]
+
+~~~shell
+vsprintf.c: In function ‘vsprintf’:
+vsprintf.c:107:6: warning: variable ‘qualifier’ set but not used [-Wunused-but-set-variable]
+  int qualifier = 'h';  /* 'h', 'l', or 'L' for integer fields */
+      ^~~~~~~~~
+~~~
+
+### 解决方法
+
+删除`./kernel/vsprintf.c`中的**qualifier**变量。
+
