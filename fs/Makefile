@@ -1,8 +1,8 @@
 AR	=ar
-AS	=as
-CC	=gcc -mcpu=i386
+AS	=as --32
+CC	=gcc -march=i386 -fno-builtin
 LD	=ld
-CFLAGS	=-Wall -fstrength-reduce -fomit-frame-pointer \
+CFLAGS	=-Wall -m32 -fstrength-reduce -fomit-frame-pointer \
 	 -nostdinc -I../include
 CPP	=gcc -E -nostdinc -I../include
 
@@ -20,7 +20,7 @@ OBJS=	open.o read_write.o inode.o file_table.o buffer.o super.o \
 	bitmap.o fcntl.o ioctl.o truncate.o
 
 fs.o: $(OBJS)
-	$(LD) -r -o fs.o $(OBJS)
+	$(LD) -m elf_i386 -r -o fs.o $(OBJS)
 
 clean:
 	rm -f core *.o *.a tmp_make

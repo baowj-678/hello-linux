@@ -24,7 +24,7 @@ extern char * strerror(int errno);
  *		(C) 1991 Linus Torvalds
  */
  
-extern inline char * strcpy(char * dest,const char *src)
+__attribute__((unused)) static inline char * strcpy(char * dest,const char *src)
 {
 __asm__("cld\n"
 	"1:\tlodsb\n\t"
@@ -35,7 +35,7 @@ __asm__("cld\n"
 return dest;
 }
 
-static inline char * strncpy(char * dest,const char *src,int count)
+__attribute__((unused)) static inline char * strncpy(char * dest,const char *src,int count)
 {
 __asm__("cld\n"
 	"1:\tdecl %2\n\t"
@@ -51,7 +51,7 @@ __asm__("cld\n"
 return dest;
 }
 
-extern inline char * strcat(char * dest,const char * src)
+__attribute__((unused)) static inline char * strcat(char * dest,const char * src)
 {
 __asm__("cld\n\t"
 	"repne\n\t"
@@ -65,7 +65,7 @@ __asm__("cld\n\t"
 return dest;
 }
 
-static inline char * strncat(char * dest,const char * src,int count)
+__attribute__((unused)) static inline char * strncat(char * dest,const char * src,int count)
 {
 __asm__("cld\n\t"
 	"repne\n\t"
@@ -85,7 +85,7 @@ __asm__("cld\n\t"
 return dest;
 }
 
-extern inline int strcmp(const char * cs,const char * ct)
+__attribute__((unused)) static inline int strcmp(const char * cs,const char * ct)
 {
 register int __res ;
 __asm__("cld\n"
@@ -104,7 +104,7 @@ __asm__("cld\n"
 return __res;
 }
 
-static inline int strncmp(const char * cs,const char * ct,int count)
+__attribute__((unused)) static inline int strncmp(const char * cs,const char * ct,int count)
 {
 register int __res ;
 __asm__("cld\n"
@@ -125,7 +125,7 @@ __asm__("cld\n"
 return __res;
 }
 
-static inline char * strchr(const char * s,char c)
+__attribute__((unused)) static inline char * strchr(const char * s,char c)
 {
 register char * __res ;
 __asm__("cld\n\t"
@@ -142,7 +142,7 @@ __asm__("cld\n\t"
 return __res;
 }
 
-static inline char * strrchr(const char * s,char c)
+__attribute__((unused)) static inline char * strrchr(const char * s,char c)
 {
 register char * __res; 
 __asm__("cld\n\t"
@@ -158,7 +158,7 @@ __asm__("cld\n\t"
 return __res;
 }
 
-extern inline int strspn(const char * cs, const char * ct)
+__attribute__((unused)) static inline int strspn(const char * cs, const char * ct)
 {
 register char * __res;
 __asm__("cld\n\t"
@@ -182,7 +182,7 @@ __asm__("cld\n\t"
 return __res-cs;
 }
 
-extern inline int strcspn(const char * cs, const char * ct)
+__attribute__((unused)) static inline int strcspn(const char * cs, const char * ct)
 {
 register char * __res;
 __asm__("cld\n\t"
@@ -206,7 +206,7 @@ __asm__("cld\n\t"
 return __res-cs;
 }
 
-extern inline char * strpbrk(const char * cs,const char * ct)
+__attribute__((unused)) static inline char * strpbrk(const char * cs,const char * ct)
 {
 register char * __res ;
 __asm__("cld\n\t"
@@ -233,7 +233,7 @@ __asm__("cld\n\t"
 return __res;
 }
 
-extern inline char * strstr(const char * cs,const char * ct)
+__attribute__((unused)) static inline char * strstr(const char * cs,const char * ct)
 {
 register char * __res ;
 __asm__("cld\n\t" \
@@ -260,7 +260,7 @@ __asm__("cld\n\t" \
 return __res;
 }
 
-extern inline int strlen(const char * s)
+__attribute__((unused)) static inline int strlen(const char * s)
 {
 register int __res ;
 __asm__("cld\n\t"
@@ -272,9 +272,9 @@ __asm__("cld\n\t"
 return __res;
 }
 
-extern char * ___strtok;
+static char * ___strtok;
 
-extern inline char * strtok(char * s,const char * ct)
+__attribute__((unused)) static inline char * strtok(char * s,const char * ct)
 {
 register char * __res ;
 __asm__("testl %1,%1\n\t"
@@ -333,7 +333,7 @@ __asm__("testl %1,%1\n\t"
 return __res;
 }
 
-static inline void * memcpy(void * dest,const void * src, int n)
+__attribute__((unused)) static inline void * memcpy(void * dest,const void * src, int n)
 {
 __asm__("cld\n\t"
 	"rep\n\t"
@@ -343,7 +343,7 @@ __asm__("cld\n\t"
 return dest;
 }
 
-extern inline void * memmove(void * dest,const void * src, int n)
+__attribute__((unused)) static inline void * memmove(void * dest,const void * src, int n)
 {
 if (dest<src)
 __asm__("cld\n\t"
@@ -360,7 +360,7 @@ __asm__("std\n\t"
 return dest;
 }
 
-static inline int memcmp(const void * cs,const void * ct,int count)
+__attribute__((unused)) static inline int memcmp(const void * cs,const void * ct,int count)
 {
 register int __res ;
 __asm__("cld\n\t"
@@ -376,7 +376,7 @@ __asm__("cld\n\t"
 return __res;
 }
 
-extern inline void * memchr(const void * cs,char c,int count)
+__attribute__((unused)) static inline void * memchr(const void * cs,char c,int count)
 {
 register void * __res ;
 if (!count)
@@ -392,7 +392,7 @@ __asm__("cld\n\t"
 return __res;
 }
 
-static inline void * memset(void * s,char c,int count)
+__attribute__((unused)) static inline void * memset(void * s,char c,int count)
 {
 __asm__("cld\n\t"
 	"rep\n\t"

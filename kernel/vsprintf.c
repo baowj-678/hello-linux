@@ -60,7 +60,7 @@ static char * number(char * str, int num, int base, int size, int precision
 		else if (base==8) size--;
 	}
 	i=0;
-	if (num==0)
+    if (num==0)
 		tmp[i++]='0';
 	else while (num!=0)
 		tmp[i++]=digits[do_div(num,base)];
@@ -104,7 +104,7 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 	int field_width;	/* width of output field */
 	int precision;		/* min. # of digits for integers; max
 				   number of chars for from string */
-	int qualifier;		/* 'h', 'l', or 'L' for integer fields */
+	// int qualifier;		/* 'h', 'l', or 'L' for integer fields */
 
 	for (str=buf ; *fmt ; ++fmt) {
 		if (*fmt != '%') {
@@ -152,9 +152,9 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 		}
 
 		/* get the conversion qualifier */
-		qualifier = -1;
+		// qualifier = -1;
 		if (*fmt == 'h' || *fmt == 'l' || *fmt == 'L') {
-			qualifier = *fmt;
+			// qualifier = *fmt;
 			++fmt;
 		}
 
