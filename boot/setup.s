@@ -1,16 +1,8 @@
 !
 !	setup.s		(C) 1991 Linus Torvalds
 !
-! setup.s is responsible for getting the system data from the BIOS,
-! and putting them into the appropriate places in system memory.
-! both setup.s and system has been loaded by the bootblock.
-!
-! This code asks the bios for memory/disk/other parameters, and
-! puts them in a "safe" place: 0x90000-0x901FF, ie where the
-! boot-block used to be. It is then up to the protected mode
-! system to read them from there before the area is overwritten
-! for buffer-blocks.
-!
+! setup.s 负责利用ROM BIOS获取系统数据并把他们放入系统内存的正确位置
+! （0x90000-0x901FF，覆盖掉bootsect）。
 
 ! NOTE! These had better be the same as in bootsect.s!
 
@@ -30,38 +22,37 @@ begbss:
 entry start
 start:
 
-! ok, the read went well so we get current cursor position and save it for
-! posterity.
+! 保存光标位置以备后面使用
 
-	mov	ax,#INITSEG	! this is done in bootsect already, but...
+	mov	ax,#INITSEG	! 这个在bootsect设置过，现在重新设置
 	mov	ds,ax
-	mov	ah,#0x03	! read cursor pos
+	mov	ah,#0x03	! 读取屏幕光标位置
 	xor	bh,bh
-	int	0x10		! save it in known place, con_init fetches
-	mov	[0],dx		! it from 0x90000.
-! Get memory size (extended mem, kB)
+	int	0x10
+	mov	[0],dx		! 保存光标的行信息
+! 获取扩展存储空间信息
 
 	mov	ah,#0x88
 	int	0x15
-	mov	[2],ax
+	mov	[2],ax		! 保存扩展存储空间信息到[0x9000]:[2]位置
 
-! Get video-card data:
+! 获取显卡信息:
 
 	mov	ah,#0x0f
 	int	0x10
-	mov	[4],bx		! bh = display page
-	mov	[6],ax		! al = video mode, ah = window width
+	mov	[4],bx		! bh = 当前显示页
+	mov	[6],ax		! al = 显示模式, ah = 窗口宽度
 
-! check for EGA/VGA and some config parameters
+! 检查 EGA/VGA 和一些配置参数
 
 	mov	ah,#0x12
 	mov	bl,#0x10
 	int	0x10
 	mov	[8],ax
-	mov	[10],bx
-	mov	[12],cx
+	mov	[10],bx		! bl = 显示内存, bh = 显示状态
+	mov	[12],cx		! cl = 显卡特性参数
 
-! Get hd0 data
+! 获取第一个硬盘信息
 
 	mov	ax,#0x0000
 	mov	ds,ax
@@ -73,7 +64,7 @@ start:
 	rep
 	movsb
 
-! Get hd1 data
+! 获取第二个硬盘信息
 
 	mov	ax,#0x0000
 	mov	ds,ax
@@ -85,7 +76,7 @@ start:
 	rep
 	movsb
 
-! Check that there IS a hd1 :-)
+! 检查是否有第二个硬盘
 
 	mov	ax,#0x01500
 	mov	dl,#0x81
@@ -103,42 +94,42 @@ no_disk1:
 	stosb
 is_disk1:
 
-! now we want to move to protected mode ...
+! 进入保护模式
 
-	cli			! no interrupts allowed !
+	cli			! 不允许中断
 
-! first we move the system to it's rightful place
+! 将system模块移到正确的位置（0x0000）
 
 	mov	ax,#0x0000
 	cld			! 'direction'=0, movs moves forward
 do_move:
-	mov	es,ax		! destination segment
+	mov	es,ax		! es:di 是目的地址
 	add	ax,#0x1000
 	cmp	ax,#0x9000
-	jz	end_move
-	mov	ds,ax		! source segment
+	jz	end_move	! 移完了，则跳转
+	mov	ds,ax		! ds:si 是源地址
 	sub	di,di
 	sub	si,si
-	mov 	cx,#0x8000
+	mov cx,#0x8000	! 移动字节数
 	rep
 	movsw
 	jmp	do_move
 
-! then we load the segment descriptors
+! 然后加载段描述符
 
 end_move:
 	mov	ax,#SETUPSEG	! right, forgot this at first. didn't work :-)
 	mov	ds,ax
-	lidt	idt_48		! load idt with 0,0
-	lgdt	gdt_48		! load gdt with whatever appropriate
+	lidt	idt_48		! 加载IDT寄存器
+	lgdt	gdt_48		! 加载GDT寄存器
 
-! that was painless, now we enable A20
+! 开启A20地址线
 
-	call	empty_8042
+	call	empty_8042	! 测试8042寄存器, 等待输入缓冲器为空
 	mov	al,#0xD1		! command write
 	out	#0x64,al
 	call	empty_8042
-	mov	al,#0xDF		! A20 on
+	mov	al,#0xDF		! A20 打开了
 	out	#0x60,al
 	call	empty_8042
 
@@ -182,17 +173,15 @@ end_move:
 ! The BIOS-routine wants lots of unnecessary data, and it's less
 ! "interesting" anyway. This is how REAL programmers do it.
 !
-! Well, now's the time to actually move into protected mode. To make
+! 现在，我们要真正进入保护模式了. To make
 ! things as simple as possible, we do no register set-up or anything,
 ! we let the gnu-compiled 32-bit programs do that. We just jump to
 ! absolute address 0x00000, in 32-bit protected mode.
-	mov	ax,#0x0001	! protected mode (PE) bit
-	lmsw	ax		! This is it!
-	jmpi	0,8		! jmp offset 0 of segment 8 (cs)
+	mov	ax,#0x0001	! 切换保护模式
+	lmsw	ax		! 
+	jmpi	0,8		! 跳转到8段，偏移0的地方（即0x0000）
 
-! This routine checks that the keyboard command queue is empty
-! No timeout is used - if this hangs there is something wrong with
-! the machine, and we probably couldn't proceed anyway.
+! 程序检查键盘队列为空
 empty_8042:
 	.word	0x00eb,0x00eb
 	in	al,#0x64	! 8042 status port

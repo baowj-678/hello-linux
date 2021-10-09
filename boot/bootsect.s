@@ -23,48 +23,48 @@ SYSSIZE = 0x3000
 ! loads pretty fast by getting whole sectors at a time whenever possible.
 
 .globl begtext, begdata, begbss, endtext, enddata, endbss
-.text // 文本段
+.text ! 文本段
 begtext:
-.data // 数据段
+.data ! 数据段
 begdata:
-.bss // 未初始化的数据段
+.bss ! 未初始化的数据段
 begbss:
 .text
 
-SETUPLEN = 4				// nr of setup-sectors
-BOOTSEG  = 0x7c00			// boot-sector的起始地址
-INITSEG  = 0x9000			// 将boot移动的目标地址
-SETUPSEG = 0x9020			// setup starts here
-SYSSEG   = 0x1000		    // 系统加载地址 0x10000 (65536).
-ENDSEG   = SYSSEG + SYSSIZE		// where to stop loading
+SETUPLEN = 4				! nr of setup-sectors
+BOOTSEG  = 0x7c00			! boot-sector的起始地址
+INITSEG  = 0x9000			! 将boot移动的目标地址
+SETUPSEG = 0x9020			! setup starts here
+SYSSEG   = 0x1000		    ! 系统加载地址 0x10000 (65536).
+ENDSEG   = SYSSEG + SYSSIZE		! where to stop loading
 
 ! ROOT_DEV:	0x000 - same type of floppy as boot.
 !		0x301 - first partition on first drive etc
 ROOT_DEV = 0x306
 
-entry _start // 程序入口
+entry _start ! 程序入口
 _start:
 	mov	ax,#BOOTSEG
 	mov	ds,ax
 	mov	ax,#INITSEG
 	mov	es,ax
-	mov	cx,#256 // 控制后面 rep movw 移动的数据量
+	mov	cx,#256 ! 控制后面 rep movw 移动的数据量
 	sub	si,si
 	sub	di,di
 	rep 
 	movw
-	jmpi	go,INITSEG // 跳转后再从 go 处执行
+	jmpi	go,INITSEG ! 跳转后再从 go 处执行
 go:	mov	ax,cs
 	mov	ds,ax
 	mov	es,ax
-// 将堆栈区放在 0x9ff00.
+! 将堆栈区放在 0x9ff00.
 	mov	ss,ax
 	mov	sp,#0xFF00		! arbitrary value >>512
 
-// 加载 setup 模块
-// es=0x90000
+! 加载 setup 模块
+! es=0x90000
 
-load_setup: // 将2扇区开始的4个扇区，读取到内存0x90200位置
+load_setup: ! 将2扇区开始的4个扇区，读取到内存0x90200位置
 	mov	dx,#0x0000		! drive 0, head 0
 	mov	cx,#0x0002		! sector 2, track 0
 	mov	bx,#0x0200		! address = 512, in INITSEG
@@ -78,10 +78,10 @@ load_setup: // 将2扇区开始的4个扇区，读取到内存0x90200位置
 
 ok_load_setup:
 
-// 获取磁盘驱动的参数, specifically nr of sectors/track
+! 获取磁盘驱动的参数, specifically nr of sectors/track
 
 	mov	dl,#0x00
-	mov	ax,#0x0800		// AH=08H是获取驱动参数
+	mov	ax,#0x0800		! AH=08H是获取驱动参数
 	int	0x13
 	mov	ch,#0x00
 	seg cs
@@ -89,19 +89,19 @@ ok_load_setup:
 	mov	ax,#INITSEG
 	mov	es,ax
 
-// 打印信息
+! 打印信息
 
-	mov	ah,#0x03		// 读取光标位置
-	xor	bh,bh           // bh=显示页码
+	mov	ah,#0x03		! 读取光标位置
+	xor	bh,bh           ! bh=显示页码
 	int	0x10
 	
-	mov	cx,#24			// 显示字符串长度
-	mov	bx,#0x0007		// 第0页, 属性7 (普通属性)
-	mov	bp,#msg1        // 字符串偏移地址
-	mov	ax,#0x1301		// 显示字符串，光标位置改变
+	mov	cx,#24			! 显示字符串长度
+	mov	bx,#0x0007		! 第0页, 属性7 (普通属性)
+	mov	bp,#msg1        ! 字符串偏移地址
+	mov	ax,#0x1301		! 显示字符串，光标位置改变
 	int	0x10
 
-// 加载系统 (地址在 0x10000)
+! 加载系统 (地址在 0x10000)
 
 	mov	ax,#SYSSEG
 	mov	es,ax
@@ -149,43 +149,43 @@ track:	.word 0			! current track
 
 read_it:
 	mov ax,es
-	test ax,#0x0fff     // test 以比特位逻辑与两个操作数
-die:	jne die			// es 必须在 64kB 边界
-	xor bx,bx	 		// bx 是段内的开始地址
+	test ax,#0x0fff     ! test 以比特位逻辑与两个操作数
+die:	jne die			! es 必须在 64kB 边界
+	xor bx,bx	 		! bx 是段内的开始地址
 rp_read:
 	mov ax,es
-	cmp ax,#ENDSEG		// 是否以及加载全部数据
-	jb ok1_read			// 没有结束，跳转
+	cmp ax,#ENDSEG		! 是否以及加载全部数据
+	jb ok1_read			! 没有结束，跳转
 	ret
 ok1_read:
 	seg cs
-	mov ax,sectors      // 取每个磁道扇区数
-	sub ax,sread		// 减去当前磁道已读扇区数
-	mov cx,ax			// 当前未读扇区数
-	shl cx,#9			// cx = cx * 512 + 段内偏移
+	mov ax,sectors      ! 取每个磁道扇区数
+	sub ax,sread		! 减去当前磁道已读扇区数
+	mov cx,ax			! 当前未读扇区数
+	shl cx,#9			! cx = cx * 512 + 段内偏移
 	add cx,bx
-	jnc ok2_read        // 如果未产生进位(即未超过64kB)则跳转
+	jnc ok2_read        ! 如果未产生进位(即未超过64kB)则跳转
 	je ok2_read
 	xor ax,ax
-	sub ax,bx			// 计算读完此段需要的偏移
-	shr ax,#9			// 计算偏移对于的扇区数，保存在al
+	sub ax,bx			! 计算读完此段需要的偏移
+	shr ax,#9			! 计算偏移对于的扇区数，保存在al
 ok2_read:
-	call read_track		// 读扇区
-	mov cx,ax			// al该次操作读取的扇区数
-	add ax,sread		// 已经读取的总扇区数
+	call read_track		! 读扇区
+	mov cx,ax			! al该次操作读取的扇区数
+	add ax,sread		! 已经读取的总扇区数
 	seg cs
-	cmp ax,sectors		// 是否还有扇区未读
-	jne ok3_read		// 还有扇区未读，则跳转
+	cmp ax,sectors		! 是否还有扇区未读
+	jne ok3_read		! 还有扇区未读，则跳转
 	mov ax,#1
-	sub ax,head			// 当前是否是1磁头
-	jne ok4_read		// 是0磁头，则跳转去读1磁头
-	inc track			// 读下一磁道(ax = 0)
+	sub ax,head			! 当前是否是1磁头
+	jne ok4_read		! 是0磁头，则跳转去读1磁头
+	inc track			! 读下一磁道(ax = 0)
 ok4_read:
-	mov head,ax			// 保存待读磁头号
+	mov head,ax			! 保存待读磁头号
 	xor ax,ax
 ok3_read:
-	mov sread,ax        // ax保存当前磁道已读的总扇区数
-	shl cx,#9			// 上次读取的扇区数
+	mov sread,ax        ! ax保存当前磁道已读的总扇区数
+	shl cx,#9			! 上次读取的扇区数
 	add bx,cx			
 	jnc rp_read
 	mov ax,es
@@ -194,42 +194,42 @@ ok3_read:
 	xor bx,bx
 	jmp rp_read
 
-read_track:				// 读从 sread已读扇区后的 al 个扇区
+read_track:				! 读从 sread已读扇区后的 al 个扇区
 	push ax
 	push bx
 	push cx
 	push dx
-	mov dx,track		// 取当前磁道号
-	mov cx,sread		// 取当前磁道上已读扇区数
-	inc cx				// cl = 开始扇区
-	mov ch,dl			// ch = 柱面号
-	mov dx,head			// 取当前磁头号
-	mov dh,dl			// dh = 磁头号
-	mov dl,#0			// dl = 驱动器号
-	and dx,#0x0100		// 磁头号不大于1
-	mov ah,#2			// 读扇区
+	mov dx,track		! 取当前磁道号
+	mov cx,sread		! 取当前磁道上已读扇区数
+	inc cx				! cl = 开始扇区
+	mov ch,dl			! ch = 柱面号
+	mov dx,head			! 取当前磁头号
+	mov dh,dl			! dh = 磁头号
+	mov dl,#0			! dl = 驱动器号
+	and dx,#0x0100		! 磁头号不大于1
+	mov ah,#2			! 读扇区
 	int 0x13
-	jc bad_rt			// 如果出错，则跳转
+	jc bad_rt			! 如果出错，则跳转
 	pop dx
 	pop cx
 	pop bx
 	pop ax
 	ret
-bad_rt:	mov ax,#0 		// ah = 0：系统复位
+bad_rt:	mov ax,#0 		! ah = 0：系统复位
 	mov dx,#0
 	int 0x13
 	pop dx
 	pop cx
 	pop bx
 	pop ax
-	jmp read_track		// 重新读数据
+	jmp read_track		! 重新读数据
 
 !/*
 ! * This procedure turns off the floppy drive motor, so
 ! * that we enter the kernel in a known state, and
 ! * don't have to worry about it later.
 ! */
-kill_motor:				// 关闭软驱马达
+kill_motor:				! 关闭软驱马达
 	push dx
 	mov dx,#0x3f2
 	mov al,#0

@@ -5,28 +5,27 @@
  */
 
 /*
- *  head.s contains the 32-bit startup code.
+ *  head.s 包含32位的汇编启动代码
  *
- * NOTE!!! Startup happens at absolute address 0x00000000, which is also where
- * the page directory will exist. The startup code will be overwritten by
- * the page directory.
+ * 注意!!! 启动代码在地址 0x00000000, 这也是页目录将存在的地方. 
+ * 因此这里的启动代码将被页目录覆盖
  */
 .text
 .globl idt,gdt,pg_dir,tmp_floppy_area
 pg_dir:
 .globl startup_32
-startup_32:
+startup_32:  # 18-22, 设置各个段寄存器
 	movl $0x10,%eax
 	mov %ax,%ds
 	mov %ax,%es
 	mov %ax,%fs
 	mov %ax,%gs
-	lss stack_start,%esp
-	call setup_idt
-	call setup_gdt
-	movl $0x10,%eax		# reload all the segment registers
-	mov %ax,%ds		# after changing gdt. CS was already
-	mov %ax,%es		# reloaded in 'setup_gdt'
+	lss stack_start,%esp # 设置系统堆栈
+	call setup_idt			# 设置中断描述符表
+	call setup_gdt			# 设置全局描述符表
+	movl $0x10,%eax		# 重新加载所有的段寄存器
+	mov %ax,%ds
+	mov %ax,%es
 	mov %ax,%fs
 	mov %ax,%gs
 	lss stack_start,%esp
@@ -135,7 +134,7 @@ tmp_floppy_area:
 	.fill 1024,1,0
 
 after_page_tables:
-	pushl $0		# These are the parameters to main :-)
+	pushl $0		# main函数的参数
 	pushl $0
 	pushl $0
 	pushl $L6		# return address for main, if it decides to.
